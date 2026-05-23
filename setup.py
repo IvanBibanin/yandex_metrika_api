@@ -8,6 +8,7 @@ setup(
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="Ivan Bibanin",
+    py_modules=["class_yadnex_metrika"],
     packages=find_packages(),
     python_requires=">=3.10",
     install_requires=[
