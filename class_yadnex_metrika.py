@@ -20,6 +20,32 @@ class YadnexMetrika:
         self.chat_id = None
         self.limit = 1000
 
+    @staticmethod
+    def _split_columns(value):
+        if value is None:
+            return []
+
+        if isinstance(value, str):
+            return [item.strip() for item in value.split(",") if item.strip()]
+
+        if isinstance(value, (list, tuple, set)):
+            columns = []
+            for item in value:
+                if isinstance(item, str):
+                    columns.extend(part.strip() for part in item.split(",") if part.strip())
+                else:
+                    columns.append(str(item))
+            return columns
+
+        return [str(value)]
+
+    @classmethod
+    def _to_csv(cls, value):
+        columns = cls._split_columns(value)
+        if not columns:
+            return None
+        return ",".join(columns)
+
     def _handle_response(self, response, success_message=""):
         """Общая обработка ответов API Яндекс Метрики."""
         if response.status_code in (200, 201, 204):
@@ -69,8 +95,8 @@ class YadnexMetrika:
                 "direct_client_logins": self.Login,
                 "limit": self.limit,
                 "offset": offset,
-                "dimensions": self.dimensions,
-                "metrics": self.metrics,
+                "dimensions": self._to_csv(self.dimensions),
+                "metrics": self._to_csv(self.metrics),
                 "attribution": self.Attribution,
                 'accuracy': 'full',
                 "currency": "RUB",
@@ -127,14 +153,9 @@ class YadnexMetrika:
             self.df_origin = pd.DataFrame()
             return self.df_origin
     
-        dimensions = self.dimensions
-        metrics = self.metrics
-    
-        if isinstance(dimensions, str):
-            dimensions = [dimensions]
-    
-        if isinstance(metrics, str):
-            metrics = [metrics]
+        dimensions = self._split_columns(self.dimensions)
+        metrics = self._split_columns(self.metrics)
+
         rows = []
         for item in data:
             row = {}
