@@ -21,43 +21,35 @@ pip install -e .
 - `requests`
 - `pandas`
 
-## Пример использования
+## Формат ответа Метрики
+
+API Яндекс Метрики возвращает строки отчета в таком формате:
 
 ```python
-ym = Yadnex_direct(
-    Tocen="your_oauth_token",
-    YM=12345678,
-    DateFrom="2026-05-01",
-    DateTo="2026-05-23",
-)
-
-data = ym.custom_report_metrika(
-    dimensions="ym:s:date",
-    metrics="ym:s:visits",
-)
-
-df = ym.to_dataframe(data)
-print(df)
+[
+    {
+        "dimensions": [{"name": "2026-05-18"}],
+        "metrics": [512.0],
+    }
+]
 ```
 
-Пример результата:
+После преобразования в `DataFrame` результат может выглядеть так:
 
 ```text
     ym:s:date  ym:s:visits
 0  2026-05-18        512.0
 ```
 
-## Несколько метрик и группировок
+## Что должен делать клиент
 
-```python
-data = ym.custom_report_metrika(
-    dimensions=["ym:s:date", "ym:s:lastTrafficSource"],
-    metrics=["ym:s:visits", "ym:s:users"],
-    Attribution="automatic",
-)
+Класс для работы с API должен:
 
-df = ym.to_dataframe(data)
-```
+- отправлять запросы в `https://api-metrika.yandex.net/stat/v1/data`;
+- поддерживать постраничную выгрузку через `limit` и `offset`;
+- принимать `dimensions`, `metrics`, `date1`, `date2`, `ids`;
+- обрабатывать HTTP-ошибки API;
+- преобразовывать ответ Метрики в `pandas.DataFrame`.
 
 ## Обработка ошибок
 
