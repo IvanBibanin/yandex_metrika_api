@@ -24,6 +24,9 @@ pip install -e .
 ## Пример использования
 
 ```python
+from class_yadnex_metrika import YadnexMetrika
+
+
 ym = YadnexMetrika(
     Tocen=Tocen,
     Login=Login,
