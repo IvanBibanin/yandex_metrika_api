@@ -27,13 +27,22 @@ pip install -e .
 from class_yadnex_metrika import YadnexMetrika
 
 
+df_yandex_metrika = df[df["Площадка"] == "Yandex_metrika"]
+data = df_yandex_metrika.iloc[0]
+
+Tocen = data["access_token"]
+YM = data["ym"]
+Login = data["Login"]
+Goals = data["goals"]
+schema = data["schema"]
+
 ym = YadnexMetrika(
     Tocen=Tocen,
     Login=Login,
-    Goals=None,
     YM=YM,
-    DateFrom="2026-05-18",
-    DateTo="2026-05-18",
+    Goals=Goals,
+    DateFrom=DATE_FROM,
+    DateTo=DATE_TO,
 )
 
 data = ym.custom_report_metrika(
