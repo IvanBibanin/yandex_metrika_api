@@ -21,6 +21,24 @@ pip install -e .
 - `requests`
 - `pandas`
 
+## Пример использования
+
+```python
+ym = YadnexMetrika(
+    Tocen=Tocen,
+    Login=Login,
+    Goals=None,
+    YM=YM,
+    DateFrom="2026-05-18",
+    DateTo="2026-05-18",
+)
+
+data = ym.custom_report_metrika(
+    dimensions="ym:s:date",
+    metrics="ym:s:visits",
+)
+```
+
 ## Формат ответа Метрики
 
 API Яндекс Метрики возвращает строки отчета в таком формате:
