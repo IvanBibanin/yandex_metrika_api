@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="yandex-metrika-api",
-    version="0.1.0",
+    version="0.1.1",
     description="Small Python client for loading reports from Yandex Metrica API.",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

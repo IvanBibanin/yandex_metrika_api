@@ -2,7 +2,7 @@ from datetime import datetime as dt, timedelta
 import pandas as pd
 import numpy as np
 import requests
-import traceback
+import time
 from typing import Any
 
 
@@ -86,36 +86,41 @@ class YadnexMetrika:
 
     def get_report_metrika(self, offset=1):
         url = 'https://api-metrika.yandex.net/stat/v1/data'
-        try:
-            headers = {'Authorization': 'OAuth ' + str(f'{self.Tocen}')}
-            params = {
-                'ids': self.YM,
-                "date1": self.DateFrom,
-                "date2": self.DateTo,
-                "direct_client_logins": self.Login,
-                "limit": self.limit,
-                "offset": offset,
-                "dimensions": self._to_csv(self.dimensions),
-                "metrics": self._to_csv(self.metrics),
-                "attribution": self.Attribution,
-                'accuracy': 'full',
-                "currency": "RUB",
-                'group': 'day'
-            }
+        headers = {'Authorization': 'OAuth ' + str(f'{self.Tocen}')}
+        params = {
+            'ids': self.YM,
+            "date1": self.DateFrom,
+            "date2": self.DateTo,
+            "direct_client_logins": self.Login,
+            "limit": self.limit,
+            "offset": offset,
+            "dimensions": self._to_csv(self.dimensions),
+            "metrics": self._to_csv(self.metrics),
+            "attribution": self.Attribution,
+            'accuracy': 'full',
+            "currency": "RUB",
+            'group': 'day'
+        }
 
-            response = requests.get(url, params=params, headers=headers)
-            print(response.status_code)
+        for attempt in range(3):
+            try:
+                response = requests.get(
+                    url, params=params, headers=headers, timeout=(10, 120)
+                )
+                break
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+                if attempt == 2:
+                    raise
+                time.sleep(2 ** attempt)
 
-            result = self._handle_response(response)
+        print(response.status_code)
+        result = self._handle_response(response)
+        response.raise_for_status()
 
-            if result is None:
-                return None
+        if not isinstance(result, dict) or not isinstance(result.get('data'), list):
+            raise ValueError("API Метрики вернул некорректный отчет: ожидался список data")
 
-            return result.get('data', [])
-
-        except:
-            print(traceback.format_exc())
-            return None
+        return result['data']
 
     def full_report_metrica(self):
         """Постраничная выгрузка из Метрики"""
@@ -127,8 +132,7 @@ class YadnexMetrika:
             data = self.get_report_metrika(offset=offset)
 
             if data is None:
-                print("Выгрузка остановлена из-за ошибки API")
-                return None
+                raise RuntimeError("Выгрузка остановлена из-за ошибки API")
 
             full_data += data
 
